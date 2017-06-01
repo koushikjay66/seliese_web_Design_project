@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Select Your Date</title>
+	<link rel="stylesheet" type="text/css" href="style/modal.css">
+</head>
+<body>
+	<h1>Please Select Your Date from Below</h1>
+
+
+	<input type="date" id="selection_Date" onchange="selection_credential(this)"><br><br>
+
+
+
+
+<div id="myModal" class="modal" >
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Choose a available timing</h2>
+    </div>
+    <div class="modal-body">
+      <p>Some text in the Modal Body</p>
+      <p>Some other text...</p>
+    </div>
+  </div>
+
+</div>
+
+<form action="#" method="#" onsubmit="prevent_and_local()" id="selection" style="display: hidden"></form>
+
+
+</body>
+
+
+</html>
+
+<script type="text/javascript">
+	var final_selection;
+	var today = new Date();
+	var date = today.getFullYear()+'-0'+(today.getMonth()+1)+'-0'+today.getDate();
+	var obj=document.getElementById("selection_Date");
+	obj.max=date;
+	obj.min=date;
+
+	var modal = document.getElementById('myModal');
+	// Get the button that opens the modal
+	var btn = document.getElementById("myBtn");
+
+	// Get the <span> element that closes the modal
+	var span = document.getElementsByClassName("close")[0];
+
+
+	// When the user clicks on <span> (x), close the modal
+	span.onclick = function() {
+	    modal.style.display = "none";
+	}
+
+	// When the user clicks anywhere outside of the modal, close it
+	window.onclick = function(event) {
+	    if (event.target == modal) {
+	        modal.style.display = "none";
+	    }
+	}
+
+	function selection_credential(Obj){
+
+	   var current_selection=Date.parse(obj.value);
+
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	      modal.style.display="block";
+	      var new_slots=coverttomilliseconds(JSON.parse(this.responseText));
+	      check_for_real_time(new_slots, current_selection);
+	      // Now it is time to check for available timings.
+
+
+	    }
+	  };
+
+	  xhttp.open("GET", "https://carhouse-86ffa.firebaseio.com/TimeSlot.json", true);
+	  xhttp.send();
+
+	}
+
+
+	function coverttomilliseconds(j){
+		console.log("La La");
+		for (var i = 0; i<j.length; i++) {
+			j[i].endDate=+new Date(j[i].endDate);
+			j[i].startDate=+new Date(j[i].startDate);
+		}
+		return j;
+
+	}
+
+	function check_for_real_time(json){
+		var d = new Date();
+		selected_time= d.getTime();
+		var object= [];
+		var j=0;
+		for (var i = 0; i<json.length; i++) {
+
+			if(json[i].startDate>=selected_time && selected_time<=json[i].endDate && json[i].freeSlots!=0){
+
+				var obj={startDate:json[i].startDate, endDate:json[i].endDate, freeSlots:json[i].freeSlots };
+				object[j]=obj;
+				console.log("sfs");
+				j++;
+			}
+		}
+
+		var form_obj= document.getElementById("selection");
+		form_obj.style.display="block";
+
+		for (var i = 0; i < object.length; i++) {
+			console.log(new Date(object[i].startDate)+","+object[i].freeSlots+","+new Date(object[i].endDate));
+			var radio=document.createElement("input");
+			radio.type="radio";
+			radio.name="schedule";
+			var d= new Date(object[i].startDate);
+			radio.value=d.getHours()+":"+d.getMinutes(radio);
+			form_obj.append(radio);
+		}
+	}
+</script>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Branch Selection</title>
+</head>
+<body>
+<h1>Please Select Your Branch Carefully</h1>
+
+	<div id="branches">
+		
+	</div><!-- End of div cars-->
+</body>
+</html>
+
+<script type="text/javascript">
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
+
+function load_branch() {
+	/*
+	Global funtion car list to save the data to 
+	*/
+
+	branch_list=null;
+
+
+  var xhttp = new XMLHttpRequest();
+
+  xhttp.onreadystatechange = function() {
+
+    if (this.readyState == 4 && this.status == 200) {
+
+    	branch_list=JSON.parse(this.responseText);
+
+    	var writable=document.getElementById("branches");
+
+    	for (var i =0; i<branch_list.length; i++) {
+
+    		var inner_div= document.createElement("div");
+    		writable.append(inner_div);
+    		var button=document.createElement("a");
+    		var bname=document.createElement("p");
+    		var city=document.createElement("p");
+    		var fax=document.createElement("p");
+    		var phone=document.createElement("p");
+    		var zip=document.createElement("p");
+
+    		inner_div.append(button);
+    		inner_div.append(bname);
+    		inner_div.append(city);
+    		inner_div.append(fax);
+    		inner_div.append(phone);
+    		inner_div.append(zip);
+
+    		button.href="http://localhost/selise/select_date.html?car_id="+getParameterByName("car_id", window.location)+"&branchName="+branch_list[i].branchInformations.branchName;
+    		button.innerHTML=branch_list[i].branchInformations.branchName;
+    		city.innerHTML=branch_list[i].branchInformations.city;
+    		fax.innerHTML=branch_list[i].branchInformations.fax;
+    		phone.innerHTML=branch_list[i].branchInformations.phone;
+    		zip.innerHTML=branch_list[i].branchInformations.zip;
+
+    	}
+    	console.log(branch_list);
+    	//return true;
+    }else if (this.readyState== 4 && this.status!=200){
+    	alert("Sorry Could not load the Request. Error Code: "+this.status);
+    	
+    }
+  };
+
+  xhttp.open("GET", "https://carhouse-86ffa.firebaseio.com/Branches.json", true);
+  xhttp.send();
+}
+
+load_branch();
+
+
+</script>
